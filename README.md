@@ -1,14 +1,12 @@
-# erl_paper_nips18
-Code accompanying the paper "Evolution-Guided Policy Gradients in Reinforcement Learning" accepted at NIPS 2018
+# AADI ERL Implementation
+Code adapted from the paper "Evolution-Guided Policy Gradients in Reinforcement Learning" accepted at NIPS 2018
 
-###### Dependencies #######
-Python 3.5.6 \
-Pytorch 0.3.1.post3 \
-Numpy 1.15.2 \
-Fastrand from https://github.com/lemire/fastrand \
-Gym 0.10.5 \
-Mujoco-py v1.50.1.59
+###### External Dependencies #######
 
+- Python 3.5.6 
+- Mujoco-py v1.50.1.59
+
+All other dependencies are listed in the `requirements.txt` file
 
 
 #### To Run #### 

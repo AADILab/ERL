@@ -48,16 +48,16 @@ class Actor(nn.Module):
         #Hidden Layer 1
         out = self.w_l1(input)
         if self.args.use_ln: out = self.lnorm1(out)
-        out = F.tanh(out)
+        out = torch.tanh(out)
 
         #Hidden Layer 2
         out = self.w_l2(out)
         if self.args.use_ln: out = self.lnorm2(out)
-        out = F.tanh(out)
+        out = torch.tanh(out)
 
 
         #Out
-        out = F.tanh(self.w_out(out))
+        out = torch.tanh(self.w_out(out))
         return out
 
 
@@ -128,8 +128,14 @@ class DDPG(object):
         next_state_batch = torch.cat(batch.next_state)
         action_batch = torch.cat(batch.action)
         reward_batch = torch.cat(batch.reward)
-        if self.args.use_done_mask: done_batch = torch.cat(batch.done)
-        state_batch.volatile = False; next_state_batch.volatile = True; action_batch.volatile = False
+        if self.args.use_done_mask:
+            done_batch = torch.cat(batch.done)
+        # state_batch.volatile = False
+        state_batch.requires_grad_(True)
+        # next_state_batch.volatile = True
+        next_state_batch.requires_grad_(False)
+        # action_batch.volatile = False
+        action_batch.requires_grad_(True)
 
         #Load everything to GPU if not already
         if self.args.is_memory_cuda and not self.args.is_cuda:
@@ -150,7 +156,7 @@ class DDPG(object):
         current_q = self.critic.forward((state_batch), (action_batch))
         dt = self.loss(current_q, target_q)
         dt.backward()
-        nn.utils.clip_grad_norm(self.critic.parameters(), 10)
+        nn.utils.clip_grad_norm_(self.critic.parameters(), 10)
         self.critic_optim.step()
 
         #Actor Update
@@ -158,7 +164,7 @@ class DDPG(object):
         policy_loss = -self.critic.forward((state_batch),self.actor.forward((state_batch)))
         policy_loss = policy_loss.mean()
         policy_loss.backward()
-        nn.utils.clip_grad_norm(self.critic.parameters(), 10)
+        nn.utils.clip_grad_norm_(self.critic.parameters(), 10)
         self.actor_optim.step()
 
         soft_update(self.actor_target, self.actor, self.tau)
